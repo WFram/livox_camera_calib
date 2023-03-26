@@ -14,6 +14,8 @@ string bag_file;
 string lidar_topic;
 string pcd_file;
 bool is_custom_msg;
+int pcl_number;
+int pcl_counter = 0;
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "lidarCamCalib");
@@ -22,6 +24,7 @@ int main(int argc, char **argv) {
   nh.param<string>("pcd_file", pcd_file, "");
   nh.param<string>("lidar_topic", lidar_topic, "/livox/lidar");
   nh.param<bool>("is_custom_msg", is_custom_msg, false);
+  nh.param<int>("pcl_number", pcl_number, 1);
   pcl::PointCloud<pcl::PointXYZI> output_cloud;
   std::fstream file_;
   file_.open(bag_file, ios::in);
@@ -43,6 +46,9 @@ int main(int argc, char **argv) {
   rosbag::View view(bag, rosbag::TopicQuery(lidar_topic_vec));
   for (const rosbag::MessageInstance &m : view) {
     if (is_custom_msg) {
+      if (pcl_counter == pcl_number) break;
+      pcl_counter++;
+      ROS_WARN("Processing Point Cloud %d", pcl_counter);
       livox_ros_driver::CustomMsg livox_cloud_msg =
           *(m.instantiate<livox_ros_driver::CustomMsg>()); // message type
       for (uint i = 0; i < livox_cloud_msg.point_num; ++i) {

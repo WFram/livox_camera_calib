@@ -1,12 +1,20 @@
 <launch>
-  <rosparam command="load" file="$(find livox_camera_calib)/config/multi_calib.yaml" />
-  <node 
+  <rosparam command="load" file="$(find livox_camera_calib)/config/multi_calib_zed2.yaml" />
+  <node
     pkg="livox_camera_calib"
     type="lidar_camera_multi_calib"
     name="lidar_camera_multi_calib"
     output="screen"
   />
-  <node 
+<!--         <node -->
+<!--             pkg="livox_camera_calib" -->
+<!--             type="lidar_camera_multi_calib" -->
+<!--             name="lidar_camera_multi_calib" -->
+<!--             output="screen" -->
+<!--             clear_params="true" -->
+<!--             launch-prefix="valgrind" -->
+<!--         /> -->
+  <node
     pkg="rviz"
     type="rviz"
     name="rviz"

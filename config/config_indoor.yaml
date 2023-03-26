@@ -12,6 +12,7 @@ ExtrinsicMat: !!opencv-matrix
          0.0,  0.0,  -1.0,    0.0,
          1.0,   0.0,    0.0,    0.0,
          0.0,   0.0,    0.0,    1.0]
+
 # Params for Canny Edge Extraction
 
 Canny.gray_threshold: 10

@@ -1,0 +1,18 @@
+# Data path. adjust them!
+common:
+    image_file: "/home/wfram/Datasets/courier/1_rsbp/img/1.png"
+    pcd_file: "/home/wfram/Datasets/courier/1_rsbp/pcd/1.pcd"
+    result_file: "/home/wfram/Datasets/courier/1_rsbp/extrinsic.txt"
+
+# Camera Parameters. Adjust them!
+camera:
+  camera_matrix:
+    [ 513.9195221, 0.0, 638.20818345,
+      0.0, 514.26664969, 368.26763722,
+      0.0, 0.0, 1.0 ]
+  dist_coeffs: [-0.01318935, -0.00131136, -0.00091831, -0.00087753, 0.0]
+
+# Calibration Parameters.!
+calib:
+    calib_config_file: "/home/wfram/livox_camera_calib_ws/src/livox_camera_calib/config/config_bpearl.yaml"
+    use_rough_calib: true # set true if your initial_extrinsic is bad

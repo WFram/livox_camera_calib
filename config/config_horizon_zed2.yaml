@@ -1,0 +1,47 @@
+%YAML:1.0
+
+# Topic name in rosbag
+PointCloudTopic: "/livox/lidar"
+ImageTopic: "/camera/color/image_raw"
+
+#Z = 0.022, X = -0.0945, Y = 0.07618 From Zed2 to Livox Horizon (LiDAR w.r.t camera) X - left
+#Z = 0.022, X = 0.0945, Y = 0.07618 From Zed2 to Livox Horizon (LiDAR w.r.t camera) X - right
+#X = -0.022, Y = 0.0945, Z = 0.07618 From Livox Horizon to Zed2 (Camera w.r.t LiDAR)
+
+ExtrinsicMat: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: d
+  # For Zed2
+  # LiDAR->Camera
+  # +90 ^-> (Camera is base frame now) AND THAT'S TRUE:
+  # (https://github.com/hku-mars/livox_camera_calib/issues/40#issuecomment-1067578854)
+  data: [0.0,   -1.0,   0.0,    0.022,
+         0.0,  0.0,  -1.0,    -0.0945,
+         1.0,   0.0,    0.0,    -0.07618,
+         0.0,   0.0,    0.0,    1.0]
+  # +90 ^-> (inversed)
+#  data: [ 0.0,   -1.0,   0.0,    0.0945,
+#          0.0,  0.0,  -1.0,    0.07618,
+#          1.0,   0.0,    0.0,    0.022,
+#          0.0,   0.0,    0.0,    1.0 ]
+  # For Kinect2
+#  data: [ 0.99702,   0.00143,   -0.07715,    -0.00210,
+#          -0.00068,  0.99995,  0.00977,    0.05740,
+#          0.07716,   -0.00969,    0.99697,    0.16166,
+#          0.0,   0.0,    0.0,    1.0 ]
+
+# Params for Canny Edge Extraction
+Canny.gray_threshold: 10
+Canny.len_threshold: 200
+
+# Params for Voxel Cutting & Plane Fitting & Edge Extraction
+Voxel.size: 0.5
+Voxel.down_sample_size: 0.02
+Plane.min_points_size: 30
+Plane.normal_theta_min: 45
+Plane.normal_theta_max: 135
+Plane.max_size: 8
+Ransac.dis_threshold: 0.02
+Edge.min_dis_threshold: 0.03
+Edge.max_dis_threshold: 0.06

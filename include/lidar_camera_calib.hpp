@@ -167,6 +167,7 @@ Calibration::Calibration(const std::string &image_file,
   loadCalibConfig(calib_config_file);
 
   image_ = cv::imread(image_file, cv::IMREAD_UNCHANGED);
+  cvtColor(image_, image_, cv::COLOR_BGRA2RGB);
   if (!image_.data) {
     std::string msg = "Can not load image from " + image_file;
     ROS_ERROR_STREAM(msg.c_str());
@@ -213,6 +214,8 @@ Calibration::Calibration(const std::string &image_file,
   Eigen::Vector3d origin(0, -25, -10);
   std::vector<VoxelGrid> voxel_list;
   std::unordered_map<VOXEL_LOC, Voxel *> voxel_map;
+//  std::vector<int> indeces;
+//  pcl::removeNaNFromPointCloud(*raw_lidar_cloud_, *raw_lidar_cloud_, indeces);
   initVoxel(raw_lidar_cloud_, voxel_size_, voxel_map);
   LiDAREdgeExtraction(voxel_map, ransac_dis_threshold_, plane_size_threshold_,
                       plane_line_cloud_);
@@ -947,7 +950,7 @@ void Calibration::calcLine(
                   plane_list[plane_index1].cloud.makeShared());
               kdtree2->setInputCloud(
                   plane_list[plane_index2].cloud.makeShared());
-              for (float inc = 0; inc <= length; inc += 0.01) {
+              for (float inc = 0; inc <= length; inc += 0.005) {
                 pcl::PointXYZI p;
                 p.x = p1.x + (p2.x - p1.x) * inc / length;
                 p.y = p1.y + (p2.y - p1.y) * inc / length;
@@ -1136,7 +1139,7 @@ void Calibration::buildVPnp(
         std::vector<Eigen::Vector2d> points_cam;
         for (size_t i = 0; i < pointIdxNKNSearch.size(); i++) {
           Eigen::Vector2d p(tree_cloud->points[pointIdxNKNSearch[i]].x,
-                            tree_cloud->points[pointIdxNKNSearch[i]].y);
+                            -tree_cloud->points[pointIdxNKNSearch[i]].y);
           points_cam.push_back(p);
         }
         calcDirection(points_cam, direction_cam);
@@ -1145,7 +1148,7 @@ void Calibration::buildVPnp(
         for (size_t i = 0; i < pointIdxNKNSearch.size(); i++) {
           Eigen::Vector2d p(
               tree_cloud_lidar->points[pointIdxNKNSearchLidar[i]].x,
-              tree_cloud_lidar->points[pointIdxNKNSearchLidar[i]].y);
+              -tree_cloud_lidar->points[pointIdxNKNSearchLidar[i]].y);
           points_lidar.push_back(p);
         }
         calcDirection(points_lidar, direction_lidar);

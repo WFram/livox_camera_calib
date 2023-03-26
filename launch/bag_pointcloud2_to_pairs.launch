@@ -1,0 +1,15 @@
+<launch>
+  <node 
+    pkg="livox_camera_calib"
+    type="bag_pointcloud2_to_pairs"
+    name="bag_pointcloud2_to_pairs"
+    output="screen"
+  />
+   <param name="bag_file" type="string" value="/home/wfram/Datasets/calibration/Bpearl_Zed2_HKU/33.bag"/>
+   <param name="lidar_topic" type="string" value="/rslidar_points"/>
+   <param name="camera_topic" type="string" value="/zed2/zed_node/left/image_rect_color"/>
+   <param name="pcd_path" type="string" value="/home/wfram/Datasets/calibration/Bpearl_Zed2_HKU/pcd/"/>
+   <param name="img_path" type="string" value="/home/wfram/Datasets/calibration/Bpearl_Zed2_HKU/img/"/>
+   <param name="is_custom_msg" type="bool" value="false"/>
+   <param name="pcl_number" type="int" value="4" />
+</launch>

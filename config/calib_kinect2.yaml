@@ -1,0 +1,17 @@
+# Data path. adjust them!
+common:
+    image_file: "/home/wfram/Datasets/indoor/kinect2/img/6.png"
+    pcd_file: "/home/wfram/Datasets/indoor/kinect2/pcd/6.pcd"
+    result_file: "/home/wfram/Datasets/indoor/kinect2/extrinsic.txt"
+
+# Camera Parameters. Adjust them!
+camera:
+  camera_matrix: [ 1005.2349658444527, 0.0, 951.1921864937732,
+                   0.0, 1005.5618437833184, 562.7644996499605,
+                   0.0, 0.0, 1.0 ]
+  dist_coeffs: [ 0.05100155355585925, -0.04377006383686457, 0.000625333133609035, 0.0024466916033656257, 0.0 ]
+
+# Calibration Parameters.!
+calib:
+    calib_config_file: "/home/wfram/livox_camera_calib_ws/src/livox_camera_calib/config/config_horizon_kinect2.yaml"
+    use_rough_calib: false # set true if your initial_extrinsic is bad

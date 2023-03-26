@@ -114,12 +114,15 @@ public:
       Eigen::Matrix<T, 1, 2> nt = pd.direction.transpose().cast<T>();
       Eigen::Matrix<T, 2, 2> V = n * nt;
       V = I - V;
-      Eigen::Matrix<T, 2, 2> R = Eigen::Matrix<float, 2, 2>::Zero().cast<T>();
+      Eigen::Matrix<T, 2, 1> R = Eigen::Matrix<float, 2, 1>::Zero().cast<T>();
       R.coeffRef(0, 0) = residuals[0];
-      R.coeffRef(1, 1) = residuals[1];
-      R = V * R * V.transpose();
+      R.coeffRef(1, 0) = residuals[1];
+      R = V * R;
+      // Eigen::Matrix<T, 2, 2> R = Eigen::Matrix<float, 2,
+      // 2>::Zero().cast<T>(); R.coeffRef(0, 0) = residuals[0];
+      // R.coeffRef(1, 1) = residuals[1]; R = V * R * V.transpose();
       residuals[0] = R.coeffRef(0, 0);
-      residuals[1] = R.coeffRef(1, 1);
+      residuals[1] = R.coeffRef(1, 0);
     }
     return true;
   }
@@ -251,28 +254,26 @@ int main(int argc, char **argv) {
   calibra.init_rgb_cloud_pub_.publish(pub_cloud);
   cv::Mat init_img = calibra.getProjectionImg(calib_params);
   cv::imshow("Initial extrinsic", init_img);
-  cv::imwrite("/home/ycj/data/calib/init.png", init_img);
+  cv::imwrite("../pics/initial_extrinsic.png", init_img);
   cv::waitKey(1000);
 
   if (use_rough_calib) {
     roughCalib(calibra, calib_params, DEG2RAD(0.1), 50);
   }
   cv::Mat test_img = calibra.getProjectionImg(calib_params);
-  cv::imshow("After rough extrinsic", test_img);
+  cv::imwrite("../pics/after_rough_calib.png", test_img);
   cv::waitKey(1000);
   int iter = 0;
   // Maximum match distance threshold: 15 pixels
   // If initial extrinsic lead to error over 15 pixels, the algorithm will not
   // work
-  int dis_threshold = 20;
+  int dis_threshold = 30;
   bool opt_flag = true;
 
   // Iteratively reducve the matching distance threshold
-  for (dis_threshold = 20; dis_threshold > 8; dis_threshold -= 1) {
+  for (dis_threshold = 30; dis_threshold > 10; dis_threshold -= 1) {
     // For each distance, do twice optimization
     for (int cnt = 0; cnt < 2; cnt++) {
-      std::cout << "Iteration:" << iter++ << " Dis:" << dis_threshold
-                << std::endl;
       if (use_vpnp) {
         calibra.buildVPnp(calib_params, dis_threshold, true,
                           calibra.rgb_egde_cloud_, calibra.plane_line_cloud_,
@@ -282,10 +283,19 @@ int main(int argc, char **argv) {
                          calibra.rgb_egde_cloud_, calibra.plane_line_cloud_,
                          pnp_list);
       }
+      std::cout << "Iteration:" << iter++ << " Dis:" << dis_threshold
+                << " pnp size:" << vpnp_list.size() << std::endl;
+
       cv::Mat projection_img = calibra.getProjectionImg(calib_params);
-      cv::imshow("Optimization", projection_img);
+      cv::imshow("../pics/optimization.png", projection_img);
       cv::waitKey(100);
-      Eigen::Quaterniond q(R);
+      Eigen::Vector3d euler_angle(calib_params[0], calib_params[1],
+                                  calib_params[2]);
+      Eigen::Matrix3d opt_init_R;
+      opt_init_R = Eigen::AngleAxisd(euler_angle[0], Eigen::Vector3d::UnitZ()) *
+                   Eigen::AngleAxisd(euler_angle[1], Eigen::Vector3d::UnitY()) *
+                   Eigen::AngleAxisd(euler_angle[2], Eigen::Vector3d::UnitX());
+      Eigen::Quaterniond q(opt_init_R);
       Eigen::Vector3d ori_t = T;
       double ext[7];
       ext[0] = q.x();
@@ -327,7 +337,7 @@ int main(int argc, char **argv) {
       ceres::Solve(options, &problem, &summary);
       std::cout << summary.BriefReport() << std::endl;
       Eigen::Matrix3d rot = m_q.toRotationMatrix();
-      Eigen::Vector3d euler_angle = rot.eulerAngles(2, 1, 0);
+      euler_angle = rot.eulerAngles(2, 1, 0);
       // std::cout << rot << std::endl;
       // std::cout << m_t << std::endl;
       calib_params[0] = euler_angle[0];
@@ -371,16 +381,17 @@ int main(int argc, char **argv) {
   outfile << 0 << "," << 0 << "," << 0 << "," << 1 << std::endl;
   cv::Mat opt_img = calibra.getProjectionImg(calib_params);
   cv::imshow("Optimization result", opt_img);
-  cv::imwrite("/home/ycj/data/calib/opt.png", opt_img);
+  cv::imwrite("../pics/optimization_result.png", opt_img);
   cv::waitKey(1000);
   Eigen::Matrix3d init_rotation;
   init_rotation << 0, -1.0, 0, 0, 0, -1.0, 1, 0, 0;
   Eigen::Matrix3d adjust_rotation;
   adjust_rotation = init_rotation.inverse() * R;
   Eigen::Vector3d adjust_euler = adjust_rotation.eulerAngles(2, 1, 0);
-  outfile << RAD2DEG(adjust_euler[0]) << "," << RAD2DEG(adjust_euler[1]) << ","
-          << RAD2DEG(adjust_euler[2]) << "," << 0 << "," << 0 << "," << 0
-          << std::endl;
+  // outfile << RAD2DEG(adjust_euler[0]) << "," << RAD2DEG(adjust_euler[1]) <<
+  // ","
+  //         << RAD2DEG(adjust_euler[2]) << "," << 0 << "," << 0 << "," << 0
+  //         << std::endl;
   while (ros::ok()) {
     sensor_msgs::PointCloud2 pub_cloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud(

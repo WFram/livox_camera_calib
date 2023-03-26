@@ -1,0 +1,37 @@
+%YAML:1.0
+
+# Topic name in rosbag
+PointCloudTopic: "/livox/lidar"
+ImageTopic: "/camera/color/image_raw"
+
+ExtrinsicMat: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: d
+  # +90 ^-> (Camera is base frame now) AND THAT'S TRUE:
+  # (https://github.com/hku-mars/livox_camera_calib/issues/40#issuecomment-1067578854)
+  # RS-Bpearl Z = 0.04927, X = 0.0, Y = 0.15743
+#  data: [ 1.0,   0.0,   0.0,    0.0,
+#          0.0,  1.0,  0.0,    0.15743,
+#          0.0,   0.0,    1.0,    0.04927,
+#          0.0,   0.0,    0.0,    1.0 ]
+  data: [ 0.996634, -0.0687886, 0.0445858, 0.000678924,
+          0.0712183, 0.99592, -0.0554142, 0.161083,
+          -0.0405921, 0.058403, 0.997467, 0.0537849,
+          0.0, 0.0, 0.0, 1.0 ]
+
+# Params for Canny Edge Extraction
+
+Canny.gray_threshold: 10
+Canny.len_threshold: 200
+
+# Params for Voxel Cutting & Plane Fitting & Edge Extraction
+Voxel.size: 1.5
+Voxel.down_sample_size: 0.02
+Plane.min_points_size: 30 # TODO
+Plane.normal_theta_min: 45
+Plane.normal_theta_max: 135
+Plane.max_size: 8 # TODO
+Ransac.dis_threshold: 0.02 # TODO Both with above
+Edge.min_dis_threshold: 0.03
+Edge.max_dis_threshold: 0.12
